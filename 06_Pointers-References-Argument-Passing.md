@@ -1,4 +1,4 @@
-# 🎓 Pointers, References & Argument Passing
+# 🎓 Pointers, References, Argument Passing & Const
 
 ---
 
@@ -621,6 +621,88 @@ int main() {
 
 ---
 
+---
+
+## 🔐 Const with Pointers
+
+### Four Combinations
+
+```cpp
+int x = 10;
+int y = 20;
+
+// 1. Pointer to non-const (can change both)
+int* p1 = &x;
+*p1 = 30;    // ✅ Can change value
+p1 = &y;     // ✅ Can change pointer
+
+// 2. Pointer to const (can't change value)
+const int* p2 = &x;
+// *p2 = 30;  // ❌ Can't change value
+p2 = &y;     // ✅ Can change pointer
+
+// 3. Const pointer (can't change pointer)
+int* const p3 = &x;
+*p3 = 30;    // ✅ Can change value
+// p3 = &y;  // ❌ Can't change pointer
+
+// 4. Const pointer to const (can't change either)
+const int* const p4 = &x;
+// *p4 = 30;  // ❌ Can't change value
+// p4 = &y;   // ❌ Can't change pointer
+```
+
+### Memory Trick: Read Right to Left
+
+```
+const int* p     → "p is a pointer to int that is const"
+                   (value is const)
+
+int* const p     → "p is a const pointer to int"
+                   (pointer is const)
+
+const int* const p → "p is a const pointer to const int"
+                     (both const)
+```
+
+### Visual Summary
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    CONST WITH POINTERS                          │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│   int* p            → can change *p, can change p               │
+│   const int* p      → can't change *p, CAN change p             │
+│   int* const p      → CAN change *p, can't change p             │
+│   const int* const p → can't change *p, can't change p          │
+│                                                                 │
+│   TIP: Look at what's to the LEFT of *                          │
+│        const int* → const is LEFT of * → value is const         │
+│        int* const → const is RIGHT of * → pointer is const      │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Common Use in Functions
+
+```cpp
+// Function promises NOT to modify data
+void print_array(const int* arr, size_t size) {
+    for (size_t i = 0; i < size; ++i) {
+        std::cout << arr[i] << " ";
+        // arr[i] = 0;  // ❌ Compiler error!
+    }
+}
+
+int main() {
+    int numbers[] = {1, 2, 3, 4, 5};
+    print_array(numbers, 5);  // Safe: function can't modify
+}
+```
+
+---
+
 ## 🔑 Key Takeaways
 
 ### Pointers
@@ -637,6 +719,15 @@ int& r = i;     // r is an alias for i
 r = 11;         // Same as i = 11
 ```
 
+### Const with Pointers
+
+| Declaration | Change Value? | Change Pointer? |
+|-------------|---------------|-----------------|
+| `int* p` | ✅ Yes | ✅ Yes |
+| `const int* p` | ❌ No | ✅ Yes |
+| `int* const p` | ✅ Yes | ❌ No |
+| `const int* const p` | ❌ No | ❌ No |
+
 ### Argument Passing
 
 | Method | Syntax | Copy? | Can Modify? |
@@ -652,4 +743,5 @@ r = 11;         // Same as i = 11
 3. **Use plain reference only when you need to modify** the argument
 4. **Prefer returning results** over modifying through reference
 5. **Consider pointers** when you want explicit `&` at call site
+6. **Use `const` pointers** to signal read-only access
 
